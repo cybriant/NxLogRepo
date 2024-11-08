@@ -1,0 +1,25 @@
+define WINDNS_OUTPUT_DESTINATION_ADDRESS 192.168.200.151
+define WINDNS_OUTPUT_DESTINATION_PORT 11518
+
+<Extension _json>
+    Module      xm_json
+</Extension>
+
+<Input winDNS_eventlog>
+	 Module  im_etw
+	 Provider  Microsoft-Windows-DNSServer
+	 Exec  to_json(); 
+</Input>
+
+<Output out_chronicle_windns>
+    Module      om_tcp
+    Host        %WINDNS_OUTPUT_DESTINATION_ADDRESS%
+    Port        %WINDNS_OUTPUT_DESTINATION_PORT%
+    Exec        $EventTime = integer($EventTime) / 1000;
+    Exec        $EventReceivedTime = integer($EventReceivedTime) / 1000;
+    Exec        to_json();
+</Output>
+
+<Route r22>
+    Path    winDNS_eventlog => out_chronicle_windns
+</Route>
